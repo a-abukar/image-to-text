@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Text Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-light {
+            background-color: #f0f2f5;
+            color: #000;
+        }
+
+        .theme-dark {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .theme-blue {
+            background-color: #d0e7ff;
+            color: #000;
+        }
+
+        .theme-green {
+            background-color: #d4f5d4;
+            color: #000;
+        }
+
+        .theme-yellow {
+            background-color: #fff5d0;
+            color: #000;
+        }
+
+        .theme-red {
+            background-color: #f5d0d0;
+            color: #000;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container.theme-light {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .container.theme-dark {
+            background-color: #444;
+            color: #fff;
+        }
+
+        .container.theme-blue {
+            background-color: #e7f3ff;
+            color: #000;
+        }
+
+        .container.theme-green {
+            background-color: #e7ffe7;
+            color: #000;
+        }
+
+        .container.theme-yellow {
+            background-color: #fffbe7;
+            color: #000;
+        }
+
+        .container.theme-red {
+            background-color: #ffe7e7;
+            color: #000;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        p {
+            color: inherit;
+        }
+
+        button, a {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin: 10px 0;
+            display: inline-block;
+            text-align: center;
+        }
+
+        button:hover, a:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        button:active, a:active {
+            transform: translateY(0);
+        }
+
+        textarea {
+            width: calc(100% - 30px);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            min-height: 200px;
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            line-height: 1.5;
+            background-color: #f9f9f9;
+            resize: none;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .paste-area {
+            border: 2px dashed #007BFF;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            min-height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: background-color 0.3s ease;
+        }
+
+        .paste-area:hover {
+            background-color: #e6f0ff;
+        }
+
+        .preview-area img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .image-info {
+            margin-top: 10px;
+            color: #555;
+        }
+
+        .filters {
+            margin-top: 10px;
+        }
+
+        .filters select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .copy-icon {
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 24px;
+            height: 24px;
+            background-image: url('https://img.icons8.com/material-outlined/24/000000/copy.png');
+            background-size: contain;
+        }
+
+        .copy-icon:hover {
+            opacity: 0.7;
+        }
+
+        .theme-selector {
+            margin-top: 20px;
+        }
+
+        .theme-selector label {
+            margin-right: 10px;
+        }
+
+        .theme-selector select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body class="theme-light">
+    <div class="container theme-light">
+        <h1>Image to Text Converter</h1>
+        <p>Upload, drag & drop, or paste your image to get the text content.</p>
+        <input type="file" id="fileInput" class="hidden">
+        <button id="fileInputButton">Choose File</button>
+        <button id="convertClipboardButton" onclick="convertClipboardImage()">Upload from Clipboard</button>
+        <div class="paste-area" id="pasteArea">
+            <p>Drag & drop or paste your image here</p>
+        </div>
+        <div class="preview-area">
+            <img id="imagePreview" src="" alt="Image Preview">
+            <button id="uploadPastedImage" onclick="uploadPastedImage()" class="hidden">Convert to Text</button>
+            <div id="imageInfo" class="image-info"></div>
+        </div>
+        <div id="message" class="message"></div>
+        <div style="position: relative;">
+            <textarea id="outputText" readonly></textarea>
+            <div class="copy-icon" onclick="copyToClipboard()"></div>
+        </div>
+        <a href="#" id="downloadLink" class="hidden" download="output.txt">Download Text File</a>
+        <button id="exportPdfButton" onclick="exportToPdf()" class="hidden">Export to PDF</button>
+        <button id="clearButton" onclick="clearForm()">Clear</button>
+        <button id="speakButton" onclick="speakText()" class="hidden">Read Aloud</button>
+        <div class="theme-selector">
+            <label for="themeSelect">Select Theme: </label>
+            <select id="themeSelect" onchange="changeTheme()">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+            </select>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script>
+        let pastedImageBlob;
+
+        function showMessage(message, isSuccess) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerText = message;
+            messageDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
+            messageDiv.style.display = 'block';
+        }
+
+        async function convertClipboardImage() {
+            try {
+                const clipboardItems = await navigator.clipboard.read();
+                for (const clipboardItem of clipboardItems) {
+                    if (clipboardItem.types.includes('image/png')) {
+                        const blob = await clipboardItem.getType('image/png');
+                        showImagePreview(blob);
+                        pastedImageBlob = blob;
+                        document.getElementById('uploadPastedImage').classList.remove('hidden');
+                        return;
+                    }
+                }
+                showMessage('No image in clipboard.', false);
+            } catch (error) {
+                console.error('Error accessing clipboard:', error);
+                showMessage('Error accessing clipboard.', false);
+            }
+        }
+
+        function uploadImage(imageFile) {
+            const outputText = document.getElementById('outputText');
+            const downloadLink = document.getElementById('downloadLink');
+            const exportPdfButton = document.getElementById('exportPdfButton');
+            const speakButton = document.getElementById('speakButton');
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                outputText.value = data.text;
+                const blob = new Blob([data.text], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.classList.remove('hidden');
+                exportPdfButton.classList.remove('hidden');
+                speakButton.classList.remove('hidden');
+                showMessage('Image processed successfully!', true);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error processing image.', false);
+            });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            if (event.target.files.length > 0) {
+                const imageFile = event.target.files[0];
+                showImagePreview(imageFile);
+                document.getElementById('uploadPastedImage').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('fileInputButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('pasteArea').addEventListener('paste', function(event) {
+            const items = (event.clipboardData || window.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    pastedImageBlob = blob;
+                    showImagePreview(blob);
+                    document.getElementById('uploadPastedImage').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('pasteArea').addEventListener('dragover', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('pasteArea').style.backgroundColor = '#e6f0ff';
+        });
+
+        document.getElementById('pasteArea').addEventListener('dragleave', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('pasteArea').style.backgroundColor = '#f9f9f9';
+        });
+
+        document.getElementById('pasteArea').addEventListener('drop', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('pasteArea').style.backgroundColor = '#f9f9f9';
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const imageFile = files[0];
+                pastedImageBlob = imageFile;
+                showImagePreview(imageFile);
+                document.getElementById('uploadPastedImage').classList.remove('hidden');
+            }
+        });
+
+        function showImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imagePreview = document.getElementById('imagePreview');
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                document.getElementById('imageInfo').innerText = `File name: ${file.name || 'Pasted Image'}, Size: ${Math.round(file.size / 1024)} KB`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function uploadPastedImage() {
+            if (pastedImageBlob) {
+                uploadImage(pastedImageBlob);
+            } else if (document.getElementById('fileInput').files.length > 0) {
+                uploadImage(document.getElementById('fileInput').files[0]);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('downloadLink').classList.add('hidden');
+            document.getElementById('exportPdfButton').classList.add('hidden');
+            document.getElementById('speakButton').classList.add('hidden');
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('uploadPastedImage').classList.add('hidden');
+            document.getElementById('imageInfo').innerText = '';
+            showMessage('Form cleared.', true);
+        }
+
+        function exportToPdf() {
+            const { jsPDF } = window.jspdf;
+            const text = document.getElementById('outputText').value;
+            const pdf = new jsPDF();
+            pdf.text(text, 10, 10);
+            pdf.save('output.pdf');
+        }
+
+        function speakText() {
+            const text = document.getElementById('outputText').value;
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US';
+            speechSynthesis.speak(speech);
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputText').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('Text copied to clipboard.', true);
+            }, (err) => {
+                showMessage('Error copying text: ' + err, false);
+            });
+        }
+
+        function changeTheme() {
+            const themeSelect = document.getElementById('themeSelect').value;
+            document.body.className = `theme-${themeSelect}`;
+            document.querySelector('.container').className = `container theme-${themeSelect}`;
+        }
+    </script>
+</body>
+
+</html>
